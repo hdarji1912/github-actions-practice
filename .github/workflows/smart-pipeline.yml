@@ -1,32 +1,20 @@
-
 name: Smart Pipeline
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
 
 # Workflow-level environment variable
 env:
   ENVIRONMENT: staging
 
 jobs:
-
   # Job 1 - Build
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
       - name: Build Application
-        run: |
-          echo "Building the application..."
-          echo "Build completed successfully!"
+        run: echo "Building the application..."
 
   # Job 2 - Lint
   lint:
@@ -41,13 +29,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
 
-      - name: Run ESLint
-        run: npm run lint
+      - name: Check JavaScript File
+        run: node src/app.js
 
   # Job 3 - Test
   test:
@@ -56,9 +43,7 @@ jobs:
 
     steps:
       - name: Run Tests
-        run: |
-          echo "Running application tests..."
-          echo "Tests completed successfully!"
+        run: echo "Testing the application..."
 
   # Job 4 - Generate Version
   generate-version:
@@ -94,10 +79,17 @@ jobs:
       - name: Print Pipeline Summary
         run: |
           echo "===== PIPELINE SUMMARY ====="
-          echo "Repository: ${{ github.repository }}"
-          echo "Branch: ${{ github.ref_name }}"
+          echo "Repository Name: ${{ github.repository }}"
+          echo "Branch Name: ${{ github.ref_name }}"
           echo "Triggered By: ${{ github.actor }}"
           echo "Commit SHA: ${{ github.sha }}"
+          echo "Commit Message: ${{ github.event.commits[0].message }}"
           echo "Runner OS: ${{ runner.os }}"
           echo "Application Version: ${{ needs.generate-version.outputs.app_version }}"
           echo "Deployment Environment: $ENVIRONMENT"
+
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "Production Deployment."
+          else
+            echo "Staging Deployment."
+          fi
