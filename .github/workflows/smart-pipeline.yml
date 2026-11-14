@@ -30,9 +30,6 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Dependencies
-        run: npm install
-
       - name: Check JavaScript File
         run: node src/app.js
 
